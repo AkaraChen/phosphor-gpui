@@ -1,5 +1,5 @@
 use gpui::AssetSource;
-use phosphor_gpui::{Assets, IconName};
+use phosphor_gpui::{Assets, IconName, Weight};
 
 #[test]
 fn house_path_is_the_phosphor_regular_asset() {
@@ -10,12 +10,23 @@ fn house_path_is_the_phosphor_regular_asset() {
 }
 
 #[test]
-fn assets_load_phosphor_paths() {
-	let bytes = Assets
-		.load("icons/phosphor/regular/house.svg")
-		.unwrap()
-		.expect("house.svg");
-	assert!(bytes.starts_with(b"<svg"));
+fn duotone_path_uses_the_weight_suffix() {
+	assert_eq!(
+		IconName::House.duotone().path().as_ref(),
+		"icons/phosphor/duotone/house-duotone.svg"
+	);
+}
+
+#[test]
+fn every_weight_has_a_file() {
+	for weight in Weight::ALL {
+		let path = IconName::House.with_weight(*weight).path();
+		let bytes = Assets
+			.load(path.as_ref())
+			.unwrap()
+			.unwrap_or_else(|| panic!("missing {path}"));
+		assert!(bytes.starts_with(b"<svg"), "{path}");
+	}
 }
 
 #[test]

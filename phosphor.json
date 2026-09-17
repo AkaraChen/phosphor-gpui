@@ -3,6 +3,6 @@
 	"version": "2.0.8",
 	"git": "https://github.com/phosphor-icons/core",
 	"rev": "d42782b2abe747d904b971ccab48b182a1455f86",
-	"weight": "regular",
+	"weights": ["thin", "light", "regular", "bold", "fill", "duotone"],
 	"icon_count": 1248
 }

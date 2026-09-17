@@ -16,7 +16,7 @@ fn pascal_case(stem: &str) -> String {
 }
 
 fn main() {
-	println!("cargo:rerun-if-changed=assets/regular");
+	println!("cargo:rerun-if-changed=assets");
 	println!("cargo:rerun-if-changed=build.rs");
 
 	let mut icons = BTreeMap::new();
@@ -34,20 +34,18 @@ fn main() {
 			"invalid icon name: {stem}"
 		);
 		assert!(
-			variant.chars().all(|c| c.is_ascii_alphanumeric()),
+			variant.chars().all(|c: char| c.is_ascii_alphanumeric()),
 			"invalid icon name: {stem}"
 		);
 		assert!(
-			icons
-				.insert(variant, format!("icons/phosphor/regular/{stem}.svg"))
-				.is_none(),
+			icons.insert(variant, stem.to_string()).is_none(),
 			"duplicate icon variant: {stem}"
 		);
 	}
 	assert!(!icons.is_empty(), "bundled icons must not be empty");
 
 	let mut code = String::from(
-		"/// Names of bundled Phosphor regular icons.\n\
+		"/// Names of bundled Phosphor icons.\n\
 		 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, gpui::IntoElement)]\n\
 		 #[non_exhaustive]\n\
 		 pub enum IconName {\n",
@@ -62,12 +60,12 @@ fn main() {
 		writeln!(code, "        Self::{variant},").unwrap();
 	}
 	code.push_str(
-		"    ];\n    /// The path understood by [`crate::Assets`].\n    pub fn path(self) -> gpui::SharedString {\n        match self {\n",
+		"    ];\n    /// Phosphor kebab-case name, without weight suffix.\n    pub fn name(self) -> &'static str {\n        match self {\n",
 	);
-	for (variant, path) in &icons {
-		writeln!(code, "            Self::{variant} => {path:?},").unwrap();
+	for (variant, stem) in &icons {
+		writeln!(code, "            Self::{variant} => {stem:?},").unwrap();
 	}
-	code.push_str("        }.into()\n    }\n}\n");
+	code.push_str("        }\n    }\n}\n");
 
 	let output = PathBuf::from(env::var_os("OUT_DIR").expect("Cargo OUT_DIR"));
 	fs::write(output.join("icon_name.rs"), code)

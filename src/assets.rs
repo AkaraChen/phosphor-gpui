@@ -5,11 +5,11 @@ use gpui::{AssetSource, SharedString};
 use rust_embed::RustEmbed;
 
 #[derive(RustEmbed)]
-#[folder = "assets/regular"]
-#[include = "*.svg"]
-struct Regular;
+#[folder = "assets"]
+#[include = "**/*.svg"]
+struct Bundled;
 
-/// Bundled Phosphor regular icons.
+/// Bundled Phosphor icons for every weight.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Assets;
 
@@ -31,15 +31,15 @@ impl AssetSource for Assets {
 		if path.is_empty() {
 			return Ok(None);
 		}
-		let Some(name) = path.strip_prefix("icons/phosphor/regular/") else {
+		let Some(name) = path.strip_prefix("icons/phosphor/") else {
 			return Ok(None);
 		};
-		Ok(Regular::get(name).map(|file| file.data))
+		Ok(Bundled::get(name).map(|file| file.data))
 	}
 
 	fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-		Ok(Regular::iter()
-			.map(|name| format!("icons/phosphor/regular/{name}").into())
+		Ok(Bundled::iter()
+			.map(|name| format!("icons/phosphor/{name}").into())
 			.filter(|name: &SharedString| name.starts_with(path))
 			.collect())
 	}

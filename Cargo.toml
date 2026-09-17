@@ -11,7 +11,7 @@ categories = ["gui"]
 build = "build.rs"
 include = [
 	"src/**",
-	"assets/regular/**",
+	"assets/**",
 	"build.rs",
 	"README.md",
 	"LICENSE",
