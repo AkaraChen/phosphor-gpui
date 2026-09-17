@@ -15,7 +15,8 @@ phosphor-gpui = { git = "https://github.com/AkaraChen/phosphor-gpui", rev = "COM
 
 ## Usage with GPUI Kit
 
-Keep GPUI Kit's default Lucide bundle as fallback, and let Phosphor answer first. Phosphor also serves the Kit default-icon paths (`icons/search.svg`, `icons/chevron-down.svg`, …) so chrome and application icons stay in one family.
+Chain Phosphor in front of Kit's default bundle. Phosphor only serves its own
+paths (`icons/phosphor/regular/house.svg`); Kit chrome still comes from Kit.
 
 ```rust
 use phosphor_gpui::{Assets as PhosphorAssets, IconName};
@@ -27,8 +28,6 @@ let app = gpui_kit::application()
 ```rust
 SidebarMenuItem::new("Home").icon(IconName::House)
 ```
-
-`IconName` is regular-weight Phosphor. Paths look like `icons/phosphor/regular/house.svg`.
 
 ## License
 

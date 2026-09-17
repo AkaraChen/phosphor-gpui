@@ -4,19 +4,17 @@ use anyhow::Result;
 use gpui::{AssetSource, SharedString};
 use rust_embed::RustEmbed;
 
-use crate::lucide::{LUCIDE_OVERRIDES, lucide_stem};
-
 #[derive(RustEmbed)]
 #[folder = "assets/regular"]
 #[include = "*.svg"]
 struct Regular;
 
-/// Phosphor regular icons, plus GPUI Kit default-icon path aliases.
+/// Bundled Phosphor regular icons.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Assets;
 
 impl Assets {
-	/// Try Phosphor first, then `fallback` (typically `gpui_kit::assets::Assets`).
+	/// Serve Phosphor paths from this source, then `fallback`.
 	pub fn with_fallback<F: AssetSource>(
 		self,
 		fallback: F,
@@ -33,32 +31,17 @@ impl AssetSource for Assets {
 		if path.is_empty() {
 			return Ok(None);
 		}
-		if let Some(name) = path.strip_prefix("icons/phosphor/regular/") {
-			return Ok(Regular::get(name).map(|file| file.data));
-		}
-		if let Some(stem) = lucide_path_stem(path) {
-			let file = format!("{}.svg", lucide_stem(stem));
-			return Ok(Regular::get(&file).map(|file| file.data));
-		}
-		Ok(None)
+		let Some(name) = path.strip_prefix("icons/phosphor/regular/") else {
+			return Ok(None);
+		};
+		Ok(Regular::get(name).map(|file| file.data))
 	}
 
 	fn list(&self, path: &str) -> Result<Vec<SharedString>> {
-		let mut paths: Vec<SharedString> = Regular::iter()
+		Ok(Regular::iter()
 			.map(|name| format!("icons/phosphor/regular/{name}").into())
 			.filter(|name: &SharedString| name.starts_with(path))
-			.collect();
-		paths.extend(Regular::iter().filter_map(|name| {
-			let lucide = format!("icons/{name}");
-			lucide.starts_with(path).then(|| lucide.into())
-		}));
-		paths.extend(LUCIDE_OVERRIDES.iter().filter_map(|&(stem, _)| {
-			let lucide = format!("icons/{stem}.svg");
-			lucide.starts_with(path).then(|| lucide.into())
-		}));
-		paths.sort();
-		paths.dedup();
-		Ok(paths)
+			.collect())
 	}
 }
 
@@ -83,12 +66,4 @@ impl<P: AssetSource, F: AssetSource> AssetSource for WithFallback<P, F> {
 		paths.dedup();
 		Ok(paths)
 	}
-}
-
-fn lucide_path_stem(path: &str) -> Option<&str> {
-	let rest = path.strip_prefix("icons/")?;
-	if rest.contains('/') {
-		return None;
-	}
-	rest.strip_suffix(".svg")
 }
